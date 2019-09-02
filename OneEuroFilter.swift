@@ -1,9 +1,8 @@
 //
 //  OneEuroFilter.swift
-//  DummyOpenCV-ARkit-project
 //
-//  Created by Somebody on 02/09/2019.
-//  Copyright © 2019 Somebody. All rights reserved.
+//  Created by Giraudeau Philippe @ Inria Bordeaux Sud-Ouest, France on 02/09/2019.
+//  Copyright © 2019 Inria Bordeaux Sud-Ouest. All rights reserved.
 //
 
 import Foundation
