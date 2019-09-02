@@ -1,5 +1,5 @@
 //
-//  OneEuroFilter.swift
+//  LowPassFilter.swift
 //
 //  Created by Giraudeau Philippe @ Inria Bordeaux Sud-Ouest, France on 02/09/2019.
 //  Copyright © 2019 Inria Bordeaux Sud-Ouest. All rights reserved.
