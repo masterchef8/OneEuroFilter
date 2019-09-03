@@ -1,37 +1,48 @@
 //
 //  OneEuroFilter.swift
+//  DummyOpenCV-ARkit-project
 //
-//  Created by Giraudeau Philippe @ Inria Bordeaux Sud-Ouest, France on 02/09/2019.
-//  Copyright © 2019 Inria Bordeaux Sud-Ouest. All rights reserved.
+//  Created by Somebody on 02/09/2019.
+//  Copyright © 2019 Somebody. All rights reserved.
 //
 
 import Foundation
 
+
+///Helper function used to init LowPassFilter properties (x, dx) in the OneEuroFilter object
+fileprivate func initAlpha(cutoff:Double, frequence freq:Double) -> Double {
+    let te:Double = 1.0 / freq
+    let tau:Double = 1.0 / (2.0 * Double.pi * cutoff)
+    return 1.0 / (1.0 + tau / te)
+}
+
 public class OneEuroFilter {
     var freq: Double
     var mincutoff: Double
-    var beta:Double
-    var dcutoff:Double
+    var beta: Double
+    var dcutoff: Double
     var x:LowPassFilter
     var dx:LowPassFilter
-    var lasttime:Double
+    var lasttime: Double
     
-    var currValue:Double
-    var prevValue:Double
+    var currValue: Double
+    var prevValue: Double
     
     init(freq:Double,  mincutoff:Double = 1.0,  beta:Double = 0.0,  dcutoff:Double = 1.0) {
         
-        setFrequency(freq);
-        setMinCutoff(mincutoff);
-        setBeta(beta);
-        setDerivateCutoff(dcutoff);
-        
-        x = LowPassFilter(alpha: alpha(mincutoff))
-        dx = LowPassFilter(alpha: alpha(dcutoff))
-        lasttime = -1.0;
-        
+        lasttime = -1.0
         currValue = 0.0
         prevValue = currValue
+        self.freq = freq
+        self.mincutoff = mincutoff
+        self.beta = beta
+        self.dcutoff = dcutoff
+        
+        
+        x = LowPassFilter(alpha: initAlpha(cutoff: mincutoff, frequence: freq))
+        dx = LowPassFilter(alpha: initAlpha(cutoff: dcutoff, frequence: freq))
+        
+        
     }
     
     func alpha(_ cutoff:Double) -> Double {
@@ -57,10 +68,6 @@ public class OneEuroFilter {
         mincutoff = mc
     }
     
-    func setBeta(_ b:Double)
-    {
-        beta = b
-    }
     
     func setDerivateCutoff(_ dc:Double)
     {
@@ -74,7 +81,7 @@ public class OneEuroFilter {
     public func UpdateParams(_ freq:Double, _ mincutoff:Double, _ beta:Double, _ dcutoff:Double){
         setFrequency(freq)
         setMinCutoff(mincutoff)
-        setBeta(beta)
+        self.beta = beta
         setDerivateCutoff(dcutoff)
         x.setAlpha(alpha: alpha(mincutoff))
         dx.setAlpha(alpha: alpha(dcutoff))
@@ -84,13 +91,13 @@ public class OneEuroFilter {
     {
         setFrequency(freq)
         setMinCutoff(mincutoff)
-        setBeta(beta)
+        self.beta = beta
         setDerivateCutoff(dcutoff)
         x.setAlpha(alpha: alpha(mincutoff))
         dx.setAlpha(alpha: alpha(dcutoff))
     }
     
-    public func Filter(_ value, timestamp = -1.0) -> Double {
+    public func Filter(_ value:Double, timestamp:Double = -1.0) -> Double {
         prevValue = currValue
     
         // update the sampling frequency based on timestamps
@@ -99,12 +106,12 @@ public class OneEuroFilter {
         }
         lasttime = timestamp
         // estimate the current variation per second
-        var dvalue = x.hasLastRawValue() ? (value - x.lastRawValue()) * freq : 0.0 // FIXME: 0.0 or value?
-        var edvalue = dx.filterWithAlpha(dvalue, alpha(dcutoff))
+        let dvalue = x.hasLastRawValue() ? (value - x.lastRawValue()) * freq : 0.0 // FIXME: 0.0 or value?
+        let edvalue = dx.filterWithAlpha(value: dvalue, alpha: alpha(dcutoff))
         // use it to update the cutoff frequency
-        var cutoff = mincutoff + beta * Double.Abs(edvalue)
+        let cutoff = mincutoff + beta * abs(edvalue)
         // filter the given value
-        currValue = x.filterWithAlpha(value, alpha(cutoff))
+        currValue = x.filterWithAlpha(value: value , alpha: alpha(cutoff))
     
         return currValue
     }
